@@ -1,5 +1,6 @@
 package com.Fujitsu.DeliveryApplication.Entities;
 
+import com.Fujitsu.DeliveryApplication.Enums.VehicleType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -10,19 +11,18 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@Table(name = "Station")
-public class Station {
+@Table(name = "Vehicle")
+public class Vehicle {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    private String stationName;
-    private String cityName;
+    @Enumerated(EnumType.STRING)
+    private VehicleType vehicleType;
 
-    public Station() {
+    public Vehicle() {
     }
 
-    public Station(String stationName, String cityName) {
-        this.stationName = stationName;
-        this.cityName = cityName;
+    public Vehicle(VehicleType vehicleType) {
+        this.vehicleType = vehicleType;
     }
 }

@@ -11,8 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface WeatherRepository extends JpaRepository<Weather, UUID> {
-    @Query("SELECT w FROM Weather w WHERE w.station = :station ORDER BY w.observationTime DESC")
-    Optional<Weather> findFirstByStationOrderByTimestampDesc(Station station);
+    Optional<Weather> findFirstByStationOrderByObservationTimeDesc(Station station);
 
     @Query("SELECT w FROM Weather w WHERE w.station = :station AND w.observationTime <= :timestamp ORDER BY w.observationTime DESC")
     Optional<Weather> findLastWeatherBeforeOrAt(

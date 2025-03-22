@@ -1,9 +1,10 @@
 package com.Fujitsu.DeliveryApplication.Components;
 
-import com.Fujitsu.DeliveryApplication.Entities.Station;
-import com.Fujitsu.DeliveryApplication.Entities.Weather;
-import com.Fujitsu.DeliveryApplication.Repositories.StationRepository;
-import com.Fujitsu.DeliveryApplication.Repositories.WeatherRepository;
+import com.Fujitsu.DeliveryApplication.Entities.*;
+import com.Fujitsu.DeliveryApplication.Enums.City;
+import com.Fujitsu.DeliveryApplication.Enums.ExtraFeeRuleName;
+import com.Fujitsu.DeliveryApplication.Enums.VehicleType;
+import com.Fujitsu.DeliveryApplication.Repositories.*;
 import com.Fujitsu.DeliveryApplication.Utils.CityStationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
@@ -20,7 +21,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -29,17 +32,123 @@ public class DataInitializer implements ApplicationRunner {
 
     private final StationRepository stationRepository;
     private final WeatherRepository weatherRepository;
+    private final VehicleRepository vehicleRepository;
+    private final BaseFeeRepository baseFeeRepository;
+    private final ExtraFeeRepository extraFeeRepository;
+    private final ExtraFeeVehicleMappingRepository extraFeeVehicleMappingRepository;
     private final RestTemplate restTemplate;
     private static final String WEATHER_API_URL = "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php";
     private final Map<String, Station> stationMap = new HashMap<>();
 
+    /**
+     * Initializes the database with default data if it is empty
+     * Weather data is always added
+     */
     @Override
     public void run(ApplicationArguments args) {
         if (stationRepository.count() == 0) {
             initializeStations();
         }
+        if (vehicleRepository.count() == 0) {
+            initializeVehicles();
+        }
+        if (baseFeeRepository.count() == 0) {
+            initializeBaseFees();
+        }
+        if (extraFeeRepository.count() == 0) {
+            initializeExtraFees();
+        }
+        if (extraFeeVehicleMappingRepository.count() == 0) {
+            initializeExtraFeeVehicleMappings();
+        }
         loadStationsIntoMemory();
         initializeWeather();
+    }
+
+    private void initializeExtraFeeVehicleMappings() {
+        List<ExtraFee> extraFees = extraFeeRepository.findAll();
+        List<Vehicle> vehicles = vehicleRepository.findAll();
+        List<ExtraFeeVehicleMapping> mappings = new ArrayList<>();
+
+        for (ExtraFee extraFee : extraFees) {
+            for (Vehicle vehicle : vehicles) {
+                boolean shouldMap = switch (extraFee.getRuleName()) {
+                    case TEMPERATURE_LOW, TEMPERATURE_BETWEEN, WEATHER_SNOW, WEATHER_SLEET, WEATHER_RAIN, WEATHER_GLAZE, WEATHER_HAIL, WEATHER_THUNDER ->
+                            vehicle.getVehicleType() == VehicleType.Bike || vehicle.getVehicleType() == VehicleType.Scooter;
+                    case WIND_BETWEEN, WIND_HIGH ->
+                            vehicle.getVehicleType() == VehicleType.Bike;
+                };
+
+                if (shouldMap) {
+                    mappings.add(new ExtraFeeVehicleMapping(extraFee, vehicle));
+                }
+            }
+        }
+
+        extraFeeVehicleMappingRepository.saveAll(mappings);
+    }
+
+
+    private void initializeVehicles() {
+        List<VehicleType> vehicleTypes = List.of(VehicleType.Car, VehicleType.Scooter, VehicleType.Bike);
+        vehicleTypes.forEach(vehicleType -> vehicleRepository.save(new Vehicle(vehicleType)));
+    }
+
+    private void initializeExtraFees() {
+        String errorMessage = "Usage of selected vehicle type is forbidden";
+
+        ExtraFee[] extraFees = {
+                new ExtraFee(ExtraFeeRuleName.TEMPERATURE_LOW, -999.0, -10.0, 1.0, null),
+                new ExtraFee(ExtraFeeRuleName.TEMPERATURE_LOW, -999.0, -10.0, 1.0, null),
+                new ExtraFee(ExtraFeeRuleName.TEMPERATURE_BETWEEN, -10.0, 0.0, 0.5, null),
+                new ExtraFee(ExtraFeeRuleName.TEMPERATURE_BETWEEN, -10.0, 0.0, 0.5, null),
+                new ExtraFee(ExtraFeeRuleName.WIND_BETWEEN, 10.0, 20.0, 0.5, null),
+                new ExtraFee(ExtraFeeRuleName.WIND_HIGH, 20.0, 999.0, 0.0, errorMessage),
+                new ExtraFee(ExtraFeeRuleName.WEATHER_SNOW, -999.0, 999.0, 1.0, null),
+                new ExtraFee(ExtraFeeRuleName.WEATHER_SNOW, -999.0, 999.0, 1.0, null),
+                new ExtraFee(ExtraFeeRuleName.WEATHER_SLEET, -999.0, 999.0, 1.0, null),
+                new ExtraFee(ExtraFeeRuleName.WEATHER_SLEET, -999.0, 999.0, 1.0, null),
+                new ExtraFee(ExtraFeeRuleName.WEATHER_RAIN, -999.0, 999.0, 0.5, null),
+                new ExtraFee(ExtraFeeRuleName.WEATHER_RAIN, -999.0, 999.0, 0.5, null),
+                new ExtraFee(ExtraFeeRuleName.WEATHER_GLAZE, -999.0, 999.0, 0.0, errorMessage),
+                new ExtraFee(ExtraFeeRuleName.WEATHER_GLAZE, -999.0, 999.0, 0.0, errorMessage),
+                new ExtraFee(ExtraFeeRuleName.WEATHER_HAIL, -999.0, 999.0, 0.0, errorMessage),
+                new ExtraFee(ExtraFeeRuleName.WEATHER_HAIL, -999.0, 999.0, 0.0, errorMessage),
+                new ExtraFee(ExtraFeeRuleName.WEATHER_THUNDER, -999.0, 999.0, 0.0, errorMessage),
+                new ExtraFee(ExtraFeeRuleName.WEATHER_THUNDER, -999.0, 999.0, 0.0, errorMessage)
+        };
+
+        extraFeeRepository.saveAll(List.of(extraFees));
+    }
+
+    private void initializeBaseFees() {
+        List<BaseFee> baseFees = new ArrayList<>();
+
+        Map<City, Map<VehicleType, Double>> baseFeeMap = Map.of(
+                City.Tallinn, Map.of(
+                        VehicleType.Car, 4.0,
+                        VehicleType.Scooter, 3.5,
+                        VehicleType.Bike, 3.0
+                ),
+                City.Tartu, Map.of(
+                        VehicleType.Car, 3.5,
+                        VehicleType.Scooter, 3.0,
+                        VehicleType.Bike, 2.5
+                ),
+                City.Pärnu, Map.of(
+                        VehicleType.Car, 3.0,
+                        VehicleType.Scooter, 2.5,
+                        VehicleType.Bike, 2.0
+                )
+        );
+
+        baseFeeMap.forEach((city, vehicleFees) ->
+                vehicleFees.forEach((vehicle, fee) ->
+                        baseFees.add(new BaseFee(city, vehicle, fee))
+                )
+        );
+
+        baseFeeRepository.saveAll(baseFees);
     }
 
     @Scheduled(cron = "${scheduling.weather.cron}")

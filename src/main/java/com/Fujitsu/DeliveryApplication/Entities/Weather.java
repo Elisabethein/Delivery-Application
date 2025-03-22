@@ -9,10 +9,9 @@ import java.sql.Timestamp;
 import java.util.UUID;
 
 @Entity
-@Table(name = "Weather")
-@Data
 @Getter
 @Setter
+@Table(name = "Weather")
 public class Weather {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
