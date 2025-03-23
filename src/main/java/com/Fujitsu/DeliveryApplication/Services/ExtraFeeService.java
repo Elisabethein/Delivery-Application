@@ -4,10 +4,10 @@ import com.Fujitsu.DeliveryApplication.Entities.ExtraFee;
 import com.Fujitsu.DeliveryApplication.Entities.ExtraFeeVehicleMapping;
 import com.Fujitsu.DeliveryApplication.Entities.Vehicle;
 import com.Fujitsu.DeliveryApplication.Entities.Weather;
-import com.Fujitsu.DeliveryApplication.Enums.City;
 import com.Fujitsu.DeliveryApplication.Enums.ExtraFeeRuleName;
 import com.Fujitsu.DeliveryApplication.Enums.VehicleType;
 import com.Fujitsu.DeliveryApplication.Exceptions.ExtraFeeNotFoundException;
+import com.Fujitsu.DeliveryApplication.Exceptions.InvalidExtraFeeRuleException;
 import com.Fujitsu.DeliveryApplication.Exceptions.VehicleNotFoundException;
 import com.Fujitsu.DeliveryApplication.Repositories.ExtraFeeRepository;
 import com.Fujitsu.DeliveryApplication.Repositories.ExtraFeeVehicleMappingRepository;
@@ -35,11 +35,10 @@ public class ExtraFeeService {
         Set<ExtraFee> matchedRules = new HashSet<>();
 
         for (ExtraFee rule : extraFees) {
-            if (matchesWeather(rule, weather)) {
-                if (matchesVehicle(rule, vehicle)) {
-                    matchedRules.add(rule);
-                }
+            if (matchesWeather(rule, weather) && matchesVehicle(rule, vehicle)) {
+                matchedRules.add(rule);
             }
+
         }
 
         double totalFee = 0.0;
@@ -65,8 +64,8 @@ public class ExtraFeeService {
 
         return switch (rule.getRuleName()) {
             case TEMPERATURE_LOW, TEMPERATURE_BETWEEN ->
-                    temperature >= rule.getMinValue() && temperature <= rule.getMaxValue();
-            case WIND_BETWEEN, WIND_HIGH -> windSpeed >= rule.getMinValue() && windSpeed <= rule.getMaxValue();
+                    temperature >= rule.getMinValue() && temperature < rule.getMaxValue();
+            case WIND_BETWEEN, WIND_HIGH -> windSpeed >= rule.getMinValue() && windSpeed < rule.getMaxValue();
             case WEATHER_SNOW, WEATHER_SLEET, WEATHER_RAIN, WEATHER_GLAZE, WEATHER_HAIL, WEATHER_THUNDER ->
                     weatherDescription.contains(rule.getRuleName().name().split("_")[1].toLowerCase());
         };
@@ -77,7 +76,13 @@ public class ExtraFeeService {
     }
 
     public String deleteExtraFee(String extraFeeType) {
-        ExtraFeeRuleName ruleEnum = ExtraFeeRuleName.valueOf(extraFeeType.toUpperCase());
+        ExtraFeeRuleName ruleEnum;
+
+        try {
+            ruleEnum = ExtraFeeRuleName.valueOf(extraFeeType.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidExtraFeeRuleException("Invalid extra fee rule: " + extraFeeType);
+        }
 
         ExtraFee extraFee = extraFeeRepository.findByRuleName(ruleEnum)
                 .orElseThrow(() -> new ExtraFeeNotFoundException("No extra fee found for rule: " + ruleEnum));
@@ -86,5 +91,23 @@ public class ExtraFeeService {
         extraFeeRepository.delete(extraFee);
 
         return String.format("Extra fee deleted successfully for rule: %s", ruleEnum);
+    }
+
+    public String updateExtraFee(String extraFeeType, double fee) {
+        ExtraFeeRuleName ruleEnum;
+
+        try {
+            ruleEnum = ExtraFeeRuleName.valueOf(extraFeeType.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidExtraFeeRuleException("Invalid extra fee rule: " + extraFeeType);
+        }
+
+        ExtraFee extraFee = extraFeeRepository.findByRuleName(ruleEnum)
+                .orElseThrow(() -> new ExtraFeeNotFoundException("No extra fee found for rule: " + ruleEnum));
+
+        extraFee.setFee(fee);
+        extraFeeRepository.save(extraFee);
+
+        return String.format("Extra fee updated successfully for rule: %s", ruleEnum);
     }
 }

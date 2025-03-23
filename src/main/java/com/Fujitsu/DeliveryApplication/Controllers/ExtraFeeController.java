@@ -1,8 +1,6 @@
 package com.Fujitsu.DeliveryApplication.Controllers;
 
-import com.Fujitsu.DeliveryApplication.Exceptions.BaseFeeNotFoundException;
-import com.Fujitsu.DeliveryApplication.Exceptions.InvalidCityException;
-import com.Fujitsu.DeliveryApplication.Exceptions.InvalidVehicleTypeException;
+import com.Fujitsu.DeliveryApplication.Exceptions.*;
 import com.Fujitsu.DeliveryApplication.Services.ExtraFeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +22,22 @@ public class ExtraFeeController {
         try {
             String response = extraFeeService.deleteExtraFee(extraFeeType);
             return ResponseEntity.ok(response);
-        }    catch (InvalidCityException | InvalidVehicleTypeException | BaseFeeNotFoundException e) {
+        }    catch (InvalidCityException | InvalidVehicleTypeException | ExtraFeeNotFoundException |
+                    InvalidExtraFeeRuleException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An unexpected error occurred: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateExtraFee(@RequestParam("extraFeeType") String extraFeeType,
+                                           @RequestParam("fee") double fee) {
+        try {
+            String response = extraFeeService.updateExtraFee(extraFeeType, fee);
+            return ResponseEntity.ok(response);
+        }  catch (InvalidCityException | InvalidVehicleTypeException | ExtraFeeNotFoundException |
+                    InvalidExtraFeeRuleException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("An unexpected error occurred: " + e.getMessage());

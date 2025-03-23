@@ -99,22 +99,14 @@ public class DataInitializer implements ApplicationRunner {
 
         ExtraFee[] extraFees = {
                 new ExtraFee(ExtraFeeRuleName.TEMPERATURE_LOW, -999.0, -10.0, 1.0, null),
-                new ExtraFee(ExtraFeeRuleName.TEMPERATURE_LOW, -999.0, -10.0, 1.0, null),
-                new ExtraFee(ExtraFeeRuleName.TEMPERATURE_BETWEEN, -10.0, 0.0, 0.5, null),
                 new ExtraFee(ExtraFeeRuleName.TEMPERATURE_BETWEEN, -10.0, 0.0, 0.5, null),
                 new ExtraFee(ExtraFeeRuleName.WIND_BETWEEN, 10.0, 20.0, 0.5, null),
                 new ExtraFee(ExtraFeeRuleName.WIND_HIGH, 20.0, 999.0, 0.0, errorMessage),
                 new ExtraFee(ExtraFeeRuleName.WEATHER_SNOW, -999.0, 999.0, 1.0, null),
-                new ExtraFee(ExtraFeeRuleName.WEATHER_SNOW, -999.0, 999.0, 1.0, null),
-                new ExtraFee(ExtraFeeRuleName.WEATHER_SLEET, -999.0, 999.0, 1.0, null),
                 new ExtraFee(ExtraFeeRuleName.WEATHER_SLEET, -999.0, 999.0, 1.0, null),
                 new ExtraFee(ExtraFeeRuleName.WEATHER_RAIN, -999.0, 999.0, 0.5, null),
-                new ExtraFee(ExtraFeeRuleName.WEATHER_RAIN, -999.0, 999.0, 0.5, null),
-                new ExtraFee(ExtraFeeRuleName.WEATHER_GLAZE, -999.0, 999.0, 0.0, errorMessage),
                 new ExtraFee(ExtraFeeRuleName.WEATHER_GLAZE, -999.0, 999.0, 0.0, errorMessage),
                 new ExtraFee(ExtraFeeRuleName.WEATHER_HAIL, -999.0, 999.0, 0.0, errorMessage),
-                new ExtraFee(ExtraFeeRuleName.WEATHER_HAIL, -999.0, 999.0, 0.0, errorMessage),
-                new ExtraFee(ExtraFeeRuleName.WEATHER_THUNDER, -999.0, 999.0, 0.0, errorMessage),
                 new ExtraFee(ExtraFeeRuleName.WEATHER_THUNDER, -999.0, 999.0, 0.0, errorMessage)
         };
 

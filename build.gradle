@@ -13,6 +13,11 @@ java {
 	}
 }
 
+bootJar {
+	archiveFileName = 'DeliveryApplication.jar'
+	destinationDirectory = file("$rootDir")
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor

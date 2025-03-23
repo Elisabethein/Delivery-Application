@@ -1,1 +1,19 @@
 services:
+  backend:
+    image: delivery-api:backend-latest
+    container_name: delivery-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_APPLICATION_NAME: DeliveryApplication
+      SCHEDULING_WEATHER_CRON: "0 15 * * * *"
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:testdb
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
+      SPRING_H2_CONSOLE_ENABLED: "true"
+    restart: unless-stopped
