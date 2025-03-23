@@ -1,9 +1,7 @@
 package com.Fujitsu.DeliveryApplication.Entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -11,6 +9,9 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "Weather")
 public class Weather {
     @Id
@@ -24,17 +25,4 @@ public class Weather {
     private Double windSpeed;
     private String weatherPhenomenon;
     private Timestamp observationTime;
-
-    public Weather() {
-    }
-
-    public Weather(Station station, String WMO, Double temperature, Double windSpeed, String weatherPhenomenon, Timestamp observationTime) {
-        this.station = station;
-        this.WMO = WMO;
-        this.temperature = temperature;
-        this.windSpeed = windSpeed;
-        this.weatherPhenomenon = weatherPhenomenon;
-        this.observationTime = observationTime;
-    }
-
 }

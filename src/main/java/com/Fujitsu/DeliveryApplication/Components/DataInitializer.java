@@ -80,7 +80,7 @@ public class DataInitializer implements ApplicationRunner {
                 };
 
                 if (shouldMap) {
-                    mappings.add(new ExtraFeeVehicleMapping(extraFee, vehicle));
+                    mappings.add(ExtraFeeVehicleMapping.builder().extraFee(extraFee).vehicle(vehicle).build());
                 }
             }
         }
@@ -91,23 +91,23 @@ public class DataInitializer implements ApplicationRunner {
 
     private void initializeVehicles() {
         List<VehicleType> vehicleTypes = List.of(VehicleType.Car, VehicleType.Scooter, VehicleType.Bike);
-        vehicleTypes.forEach(vehicleType -> vehicleRepository.save(new Vehicle(vehicleType)));
+        vehicleTypes.forEach(vehicleType -> vehicleRepository.save(Vehicle.builder().vehicleType(vehicleType).build()));
     }
 
     private void initializeExtraFees() {
         String errorMessage = "Usage of selected vehicle type is forbidden";
 
         ExtraFee[] extraFees = {
-                new ExtraFee(ExtraFeeRuleName.TEMPERATURE_LOW, -999.0, -10.0, 1.0, null),
-                new ExtraFee(ExtraFeeRuleName.TEMPERATURE_BETWEEN, -10.0, 0.0, 0.5, null),
-                new ExtraFee(ExtraFeeRuleName.WIND_BETWEEN, 10.0, 20.0, 0.5, null),
-                new ExtraFee(ExtraFeeRuleName.WIND_HIGH, 20.0, 999.0, 0.0, errorMessage),
-                new ExtraFee(ExtraFeeRuleName.WEATHER_SNOW, -999.0, 999.0, 1.0, null),
-                new ExtraFee(ExtraFeeRuleName.WEATHER_SLEET, -999.0, 999.0, 1.0, null),
-                new ExtraFee(ExtraFeeRuleName.WEATHER_RAIN, -999.0, 999.0, 0.5, null),
-                new ExtraFee(ExtraFeeRuleName.WEATHER_GLAZE, -999.0, 999.0, 0.0, errorMessage),
-                new ExtraFee(ExtraFeeRuleName.WEATHER_HAIL, -999.0, 999.0, 0.0, errorMessage),
-                new ExtraFee(ExtraFeeRuleName.WEATHER_THUNDER, -999.0, 999.0, 0.0, errorMessage)
+                ExtraFee.builder().ruleName(ExtraFeeRuleName.TEMPERATURE_LOW).minValue(-999.0).maxValue(-10.0).fee(1.0).build(),
+                ExtraFee.builder().ruleName(ExtraFeeRuleName.TEMPERATURE_BETWEEN).minValue(-10.0).maxValue(0.0).fee(0.5).build(),
+                ExtraFee.builder().ruleName(ExtraFeeRuleName.WIND_BETWEEN).minValue(10.0).maxValue(20.0).fee(0.5).build(),
+                ExtraFee.builder().ruleName(ExtraFeeRuleName.WIND_HIGH).minValue(20.0).maxValue(999.0).fee(0.0).errorMessage(errorMessage).build(),
+                ExtraFee.builder().ruleName(ExtraFeeRuleName.WEATHER_SNOW).minValue(-999.0).maxValue(999.0).fee(1.0).build(),
+                ExtraFee.builder().ruleName(ExtraFeeRuleName.WEATHER_SLEET).minValue(-999.0).maxValue(999.0).fee(1.0).build(),
+                ExtraFee.builder().ruleName(ExtraFeeRuleName.WEATHER_RAIN).minValue(-999.0).maxValue(999.0).fee(0.5).build(),
+                ExtraFee.builder().ruleName(ExtraFeeRuleName.WEATHER_GLAZE).minValue(-999.0).maxValue(999.0).fee(0.0).errorMessage(errorMessage).build(),
+                ExtraFee.builder().ruleName(ExtraFeeRuleName.WEATHER_HAIL).minValue(-999.0).maxValue(999.0).fee(0.0).errorMessage(errorMessage).build(),
+                ExtraFee.builder().ruleName(ExtraFeeRuleName.WEATHER_THUNDER).minValue(-999.0).maxValue(999.0).fee(0.0).errorMessage(errorMessage).build()
         };
 
         extraFeeRepository.saveAll(List.of(extraFees));
@@ -136,7 +136,7 @@ public class DataInitializer implements ApplicationRunner {
 
         baseFeeMap.forEach((city, vehicleFees) ->
                 vehicleFees.forEach((vehicle, fee) ->
-                        baseFees.add(new BaseFee(city, vehicle, fee))
+                        baseFees.add(BaseFee.builder().city(city).vehicleType(vehicle).fee(fee).build())
                 )
         );
 
@@ -172,13 +172,20 @@ public class DataInitializer implements ApplicationRunner {
         double windSpeed = Double.parseDouble(getElementText(stationElement, "windspeed"));
         String phenomenon = getElementText(stationElement, "phenomenon");
 
-        Weather weather = new Weather(station, wmocode, airTemperature, windSpeed, phenomenon, new Timestamp(System.currentTimeMillis()));
+        Weather weather = Weather.builder()
+                .station(station)
+                .WMO(wmocode)
+                .temperature(airTemperature)
+                .windSpeed(windSpeed)
+                .weatherPhenomenon(phenomenon)
+                .observationTime(new Timestamp(System.currentTimeMillis()))
+                .build();
         weatherRepository.save(weather);
     }
 
     private void initializeStations() {
         CityStationMapper.getStationMappings().forEach((stationName, cityName) -> {
-            stationRepository.save(new Station(stationName, cityName));
+            stationRepository.save(Station.builder().stationName(stationName).cityName(cityName).build());
         });
     }
 

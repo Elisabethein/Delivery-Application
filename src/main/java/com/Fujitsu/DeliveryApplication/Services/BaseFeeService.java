@@ -16,9 +16,6 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class BaseFeeService {
     private final BaseFeeRepository baseFeeRepository;
-
-    private static final String INVALID_CITY_MSG = "Invalid city: %s. Expected cities: %s";
-    private static final String INVALID_VEHICLE_TYPE_MSG = "Invalid vehicle type: %s. Expected types: %s";
     private static final String BASE_FEE_NOT_FOUND_MSG = "No base fee found for city: %s and vehicle type: %s";
     private static final String BASE_FEE_UPDATED_MSG = "Base fee updated successfully for city: %s and vehicle type: %s";
     private static final String BASE_FEE_DELETED_MSG = "Base fee deleted successfully for city: %s and vehicle type: %s";
@@ -29,7 +26,7 @@ public class BaseFeeService {
      * If no base fee is found, throw a BaseFeeNotFoundException
      */
     public double getBaseFee(String city, VehicleType vehicleType) {
-        City cityEnum = parseCity(city);
+        City cityEnum = parseEnum(City.class, capitalize(city), InvalidCityException.class);
 
         return baseFeeRepository.findByCityAndVehicleType(cityEnum, vehicleType)
                 .map(BaseFee::getFee)
@@ -45,8 +42,8 @@ public class BaseFeeService {
      * If no base fee is found, throw a BaseFeeNotFoundException
      */
     public String updateBaseFee(String city, String vehicleType, double fee) {
-        City cityEnum = parseCity(city);
-        VehicleType vehicleTypeEnum = parseVehicleType(vehicleType);
+        City cityEnum = parseEnum(City.class, capitalize(city), InvalidCityException.class);
+        VehicleType vehicleTypeEnum = parseEnum(VehicleType.class, vehicleType, InvalidVehicleTypeException.class);
 
         BaseFee baseFee = baseFeeRepository.findByCityAndVehicleType(cityEnum, vehicleTypeEnum)
                 .orElseThrow(() -> new BaseFeeNotFoundException(String.format(BASE_FEE_NOT_FOUND_MSG, cityEnum, vehicleTypeEnum)));
@@ -62,8 +59,8 @@ public class BaseFeeService {
      * If no base fee is found, throw a BaseFeeNotFoundException
      */
     public String deleteBaseFee(String city, String vehicleType) {
-        City cityEnum = parseCity(city);
-        VehicleType vehicleTypeEnum = parseVehicleType(vehicleType);
+        City cityEnum = parseEnum(City.class, capitalize(city), InvalidCityException.class);
+        VehicleType vehicleTypeEnum = parseEnum(VehicleType.class, vehicleType, InvalidVehicleTypeException.class);
 
         BaseFee baseFee = baseFeeRepository.findByCityAndVehicleType(cityEnum, vehicleTypeEnum)
                 .orElseThrow(() -> new BaseFeeNotFoundException(String.format(BASE_FEE_NOT_FOUND_MSG, cityEnum, vehicleTypeEnum)));
@@ -73,23 +70,23 @@ public class BaseFeeService {
         return String.format(BASE_FEE_DELETED_MSG, cityEnum, vehicleTypeEnum);
     }
 
-    private City parseCity(String city) {
-        String formattedCity = capitalize(city);
+    private <E extends Enum<E>, X extends RuntimeException> E parseEnum(Class<E> enumType, String value, Class<X> exceptionType) {
         try {
-            return City.valueOf(formattedCity);
+            return Enum.valueOf(enumType, value);
         } catch (IllegalArgumentException e) {
-            throw new InvalidCityException(String.format(INVALID_CITY_MSG, city, Arrays.toString(City.values())));
+            String message = String.format("Invalid %s: %s. Expected values: %s", enumType.getSimpleName(), value, Arrays.toString(enumType.getEnumConstants()));
+            throw createException(exceptionType, message);
         }
     }
 
-    private VehicleType parseVehicleType(String vehicleType) {
-        String formattedVehicleType = capitalize(vehicleType);
+    private <X extends RuntimeException> X createException(Class<X> exceptionType, String message) {
         try {
-            return VehicleType.valueOf(formattedVehicleType);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidVehicleTypeException(String.format(INVALID_VEHICLE_TYPE_MSG, vehicleType, Arrays.toString(VehicleType.values())));
+            return exceptionType.getConstructor(String.class).newInstance(message);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create exception: " + exceptionType.getSimpleName(), e);
         }
     }
+
     private String capitalize(String str) {
         if (str == null || str.isEmpty()) {
             throw new IllegalArgumentException("Input string cannot be null or empty");

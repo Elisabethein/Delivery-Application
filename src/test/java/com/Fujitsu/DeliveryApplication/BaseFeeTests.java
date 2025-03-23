@@ -33,7 +33,11 @@ public class BaseFeeTests {
     void setUp() {
         baseFeeRepository.deleteAll();
         double testFee = 4.0;
-        baseFeeRepository.save(new BaseFee(testCity, testVehicleType, testFee));
+        baseFeeRepository.save(BaseFee.builder()
+                .city(testCity)
+                .vehicleType(testVehicleType)
+                .fee(testFee)
+                .build());
     }
 
     @Test
@@ -59,7 +63,7 @@ public class BaseFeeTests {
     void testUpdateBaseFee() throws Exception {
         double newFee = 6.0;
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/base-fee/update")
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/base-fee/update")
                 .param("city", testCity.name())
                 .param("vehicleType", testVehicleType.name())
                 .param("fee", String.valueOf(newFee)))
@@ -73,7 +77,7 @@ public class BaseFeeTests {
 
     @Test
     void testUpdateBaseFeeInvalidCity() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/base-fee/update")
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/base-fee/update")
                         .param("city", "InvalidCity")
                         .param("vehicleType", testVehicleType.name())
                         .param("fee", "5.0"))
@@ -82,7 +86,7 @@ public class BaseFeeTests {
 
     @Test
     void testUpdateBaseFeeInvalidVehicleType() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/base-fee/update")
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/base-fee/update")
                         .param("city", testCity.name())
                         .param("vehicleType", "InvalidVehicleType")
                         .param("fee", "5.0"))

@@ -17,7 +17,7 @@ public class BaseFeeController {
         return ResponseEntity.ok(baseFeeService.getAllBaseFees());
     }
 
-    @PutMapping("/update")
+    @PatchMapping("/update")
     public ResponseEntity<?> updateBaseFee(@RequestParam("city") String city,
                                            @RequestParam("vehicleType") String vehicleType,
                                            @RequestParam("fee") double fee) {

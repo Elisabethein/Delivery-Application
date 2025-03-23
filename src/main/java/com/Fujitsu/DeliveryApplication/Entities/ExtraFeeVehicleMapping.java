@@ -1,15 +1,16 @@
 package com.Fujitsu.DeliveryApplication.Entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Table(name = "ExtraFeeVehicleMapping")
 public class ExtraFeeVehicleMapping {
     @Id
@@ -21,12 +22,4 @@ public class ExtraFeeVehicleMapping {
     @ManyToOne
     @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
-
-    public ExtraFeeVehicleMapping() {
-    }
-
-    public ExtraFeeVehicleMapping(ExtraFee extraFee, Vehicle vehicle) {
-        this.extraFee = extraFee;
-        this.vehicle = vehicle;
-    }
 }

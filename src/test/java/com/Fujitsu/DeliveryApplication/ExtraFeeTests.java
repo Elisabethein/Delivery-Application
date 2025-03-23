@@ -63,7 +63,7 @@ public class ExtraFeeTests {
 
             double newFee = 6.0;
 
-            mockMvc.perform(MockMvcRequestBuilders.put("/api/extra-fee/update")
+            mockMvc.perform(MockMvcRequestBuilders.patch("/api/extra-fee/update")
                             .param("extraFeeType", rule.name())
                             .param("fee", String.valueOf(newFee)))
                     .andExpect(status().isOk());

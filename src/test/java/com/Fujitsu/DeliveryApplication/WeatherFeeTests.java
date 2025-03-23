@@ -46,8 +46,22 @@ public class WeatherFeeTests {
         Station station = stationRepository.getByStationName("Tallinn-Harku").orElse(null);
         Station station2 = stationRepository.getByStationName("Tartu-Tõravere").orElse(null);
 
-        weatherRepository.save(new Weather(station, "12345", -5.0, 20.0, "snowy and light rain showers", Timestamp.valueOf(testTime)));
-        weatherRepository.save(new Weather(station2, "12345", 5.0, 5.0, "sunny", Timestamp.valueOf(testTime)));
+        weatherRepository.save(Weather.builder()
+                .station(station)
+                .observationTime(Timestamp.valueOf(testTime))
+                .WMO("12345")
+                .temperature(-5.0)
+                .windSpeed(20.0)
+                .weatherPhenomenon("snowy and light rain showers")
+                .build());
+        weatherRepository.save(Weather.builder()
+                .station(station2)
+                .observationTime(Timestamp.valueOf(testTime))
+                .WMO("12345")
+                .temperature(5.0)
+                .windSpeed(5.0)
+                .weatherPhenomenon("sunny")
+                .build());
     }
 
     @Test

@@ -81,7 +81,7 @@ GET `/base-fee/all`
    * 200 OK: Returns all base fees.
 
 
-PUT `/base-fee/update`
+PATCH `/base-fee/update`
 * Description: Updates the base fee for a given city and vehicle type.
 * Parameters:
   * city: City (String, required)
@@ -111,7 +111,7 @@ GET `/extra-fee/all`
    * 200 OK: Returns all extra fees.
 
 
-PUT `/extra-fee/update`
+PATCH `/extra-fee/update`
 * Description: Updates the extra fee for a given city, vehicle type, and rule type.
 * Parameters:
   * city: City (String, required)

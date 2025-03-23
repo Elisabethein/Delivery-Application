@@ -30,7 +30,7 @@ public class ExtraFeeController {
         }
     }
 
-    @PutMapping("/update")
+    @PatchMapping("/update")
     public ResponseEntity<?> updateExtraFee(@RequestParam("extraFeeType") String extraFeeType,
                                            @RequestParam("fee") double fee) {
         try {
