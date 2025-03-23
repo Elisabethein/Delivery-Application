@@ -29,6 +29,11 @@ public class WeatherService {
         return weatherRepository.findFirstByStationOrderByObservationTimeDesc(station).orElse(null);
     }
 
+    /**
+     * Calculate the delivery fee based on the city, vehicle type, and datetime
+     * Sums the base fee and extra fee to get the total fee
+     * @return the total fee
+     */
     public Object calculateWeatherFee(String city, String vehicleType, String datetime) {
         String formattedVehicleType = vehicleType.substring(0, 1).toUpperCase() + vehicleType.substring(1).toLowerCase();
 
@@ -59,6 +64,9 @@ public class WeatherService {
         return (extraFee instanceof Double) ? baseFee + (double) extraFee : extraFee;
     }
 
+    /**
+     * Get the weather data for the given city and datetime
+     */
     public Weather getWeather(String city, String datetime) {
         Station station = getStation(city);
 
@@ -72,6 +80,9 @@ public class WeatherService {
         return weatherRepository.findLastWeatherBeforeOrAt(station, timestamp).orElse(null);
     }
 
+    /**
+     * Get the station for the given city from the CityStationMapper
+     */
     public Station getStation(String city) {
         return stationRepository.getByStationName(CityStationMapper.getStationByCity(city))
                 .orElseThrow(() -> new InvalidCityException("Invalid city: " + city));

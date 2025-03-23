@@ -27,6 +27,11 @@ public class ExtraFeeService {
     private final ExtraFeeRepository extraFeeRepository;
     private final ExtraFeeVehicleMappingRepository extraFeeVehicleMappingRepository;
 
+    /**
+     * Get the extra fee for the given weather and vehicle type
+     * Finds all extra fees that match the given weather and vehicle type
+     * @return the total extra fee
+     */
     public Object getExtraFee(Weather weather, VehicleType vehicleType) {
         Vehicle vehicle = vehicleRepository.findByVehicleType(vehicleType)
                 .orElseThrow(() -> new VehicleNotFoundException("Vehicle not found for type: " + vehicleType));
@@ -52,11 +57,17 @@ public class ExtraFeeService {
         return totalFee;
     }
 
+    /**
+     * Check if the given vehicle matches the rule based on the rule name and vehicle data and their mapping
+     */
     private boolean matchesVehicle(ExtraFee rule, Vehicle vehicle) {
         Optional<ExtraFeeVehicleMapping> mapping = extraFeeVehicleMappingRepository.findByExtraFeeAndVehicle(rule, vehicle);
         return mapping.isPresent();
     }
 
+    /**
+     * Check if the given weather matches the rule based on the rule name and weather data
+     */
     private boolean matchesWeather(ExtraFee rule, Weather weather) {
         double temperature = weather.getTemperature();
         double windSpeed = weather.getWindSpeed();
@@ -75,6 +86,10 @@ public class ExtraFeeService {
         return extraFeeRepository.findAll();
     }
 
+    /**
+     * Delete the extra fee for the given rule
+     * If no extra fee is found, throw an ExtraFeeNotFoundException
+     */
     public String deleteExtraFee(String extraFeeType) {
         ExtraFeeRuleName ruleEnum;
 
@@ -93,6 +108,10 @@ public class ExtraFeeService {
         return String.format("Extra fee deleted successfully for rule: %s", ruleEnum);
     }
 
+    /**
+     * Update the extra fee for the given rule
+     * If no extra fee is found, throw an ExtraFeeNotFoundException
+     */
     public String updateExtraFee(String extraFeeType, double fee) {
         ExtraFeeRuleName ruleEnum;
 

@@ -24,6 +24,10 @@ public class BaseFeeService {
     private static final String BASE_FEE_DELETED_MSG = "Base fee deleted successfully for city: %s and vehicle type: %s";
 
 
+    /**
+     * Get the base fee for the given city and vehicle type
+     * If no base fee is found, throw a BaseFeeNotFoundException
+     */
     public double getBaseFee(String city, VehicleType vehicleType) {
         City cityEnum = parseCity(city);
 
@@ -36,6 +40,10 @@ public class BaseFeeService {
         return baseFeeRepository.findAll();
     }
 
+    /**
+     * Update the base fee for the given city and vehicle type
+     * If no base fee is found, throw a BaseFeeNotFoundException
+     */
     public String updateBaseFee(String city, String vehicleType, double fee) {
         City cityEnum = parseCity(city);
         VehicleType vehicleTypeEnum = parseVehicleType(vehicleType);
@@ -49,6 +57,10 @@ public class BaseFeeService {
         return String.format(BASE_FEE_UPDATED_MSG, cityEnum, vehicleTypeEnum);
     }
 
+    /**
+     * Delete the base fee for the given city and vehicle type
+     * If no base fee is found, throw a BaseFeeNotFoundException
+     */
     public String deleteBaseFee(String city, String vehicleType) {
         City cityEnum = parseCity(city);
         VehicleType vehicleTypeEnum = parseVehicleType(vehicleType);
